@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 abstract class SimplerLoginPlatformInterface extends PlatformInterface {
@@ -15,6 +16,7 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
   int? forceResendingToken;
   var _errorStreamController = StreamController<String?>.broadcast();
   var _otpSentController = StreamController<bool>.broadcast();
+  final googleSignIn = GoogleSignIn();
 
   ///FirebaseAuth
   FirebaseAuth get auth => _auth;
@@ -222,6 +224,47 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
           _errorStreamController.add('Error occured. Contact admin!!');
           break;
       }
+    }
+  }
+
+  ///
+  ///
+  ///
+  Future<UserCredential?> signInWithGoogle() async {
+    final googleSignInAccount = await googleSignIn.signIn();
+    if (googleSignInAccount != null) {
+      try {
+        final googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
+        );
+        var creds = await auth.signInWithCredential(credential);
+        if (creds.user != null) _errorStreamController.sink.add(null);
+        return creds;
+      } on FirebaseAuthException catch (e) {
+        switch (e.code) {
+          case 'account-exists-with-different-credential':
+            _errorStreamController.sink.add('Phonenumber already in use');
+            break;
+          case 'invalid-credential':
+            _errorStreamController.sink.add('Credential provided are invalid');
+            break;
+          case 'user-disabled':
+            _errorStreamController.sink.add('Account banned');
+            break;
+          case 'invalid-verification-code':
+            _errorStreamController.sink.add('OTP provided is Invalid');
+            break;
+          default:
+            _errorStreamController.add('Error occured. Contact admin!!');
+            break;
+        }
+      }
+    } else {
+      _errorStreamController.add('Sign In Failed. Try again afetr sometime');
+      return null;
     }
   }
 
