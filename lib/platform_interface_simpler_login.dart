@@ -46,13 +46,22 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
   ///    email/password accounts in the Firebase Console, under the Auth tab.
   /// - **Provided password is weak**:
   ///  - Thrown if the password is not strong enough.
-  Future<UserCredential?> createUserWithEmailAndPassword(
-      {required String email, required String password}) async {
+  Future<UserCredential?> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    bool updateProfile = false,
+    String? displayName,
+    String? photoURL,
+  }) async {
     try {
       print(email);
       var creds = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       if (creds.user != null) _errorStreamController.sink.add(null);
+      if (updateProfile) {
+        await creds.user?.updateDisplayName(displayName);
+        await creds.user?.updatePhotoURL(photoURL);
+      }
       return creds;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -85,12 +94,21 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
   /// - **Provided password is wrongss**:
   ///  - Thrown if the password is invalid for the given email, or the account
   ///    corresponding to the email does not have a password set.
-  Future<UserCredential?> signInWithEmailAndPassword(
-      {required String email, required String password}) async {
+  Future<UserCredential?> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+    bool updateProfile = false,
+    String? displayName,
+    String? photoURL,
+  }) async {
     try {
       var creds = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       if (creds.user != null) _errorStreamController.sink.add(null);
+      if (updateProfile) {
+        await creds.user?.updateDisplayName(displayName);
+        await creds.user?.updatePhotoURL(photoURL);
+      }
       return creds;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -195,16 +213,22 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
   Future<UserCredential?> verifyOtp({
     required String smsCode,
     String verificationId = '',
+    bool updateProfile = false,
+    String? displayName,
+    String? photoURL,
   }) async {
-    // assert(this.verificationId != null && verificationId == null);
-
     try {
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
           verificationId:
               verificationId.isEmpty ? this.verificationId! : verificationId,
           smsCode: smsCode);
       var creds = await _auth.signInWithCredential(credential);
+
       if (creds.user != null) _errorStreamController.sink.add(null);
+      if (updateProfile) {
+        await creds.user?.updateDisplayName(displayName);
+        await creds.user?.updatePhotoURL(photoURL);
+      }
       return creds;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
@@ -272,5 +296,15 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
   dispose() {
     _errorStreamController.close();
     _otpSentController.close();
+  }
+
+  ///
+  ///[signOut] method
+  ///
+  Future<void> signOut() async {
+    Future.wait({
+      _auth.signOut(),
+      googleSignIn.signOut(),
+    });
   }
 }
