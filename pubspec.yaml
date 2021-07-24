@@ -1,6 +1,6 @@
 name: simpler_login
 description: A new flutter plugin project.
-version: 0.0.1+5
+version: 0.0.1+7
 homepage: https://teamdrt.co.in
 repository: https://github.com/teamDrt2803/simpler_login
 
@@ -13,10 +13,10 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  firebase_auth: ^1.3.0
+  firebase_auth: ^3.0.1
   google_fonts: ^2.1.0
-  google_sign_in: ^5.0.4
-  plugin_platform_interface: ^2.0.0
+  google_sign_in: ^5.0.5
+  plugin_platform_interface: ^2.0.1
 
 dev_dependencies:
   flutter_test:

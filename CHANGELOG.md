@@ -1,3 +1,9 @@
+## 0.0.1+7
+
+* Updated dependencies to their latest versions.
+## 0.0.1+6
+
+* Updated dependencies to their latest versions.
 ## 0.0.1+5
 
 * Added parameters to update user profile on authentication successful.
