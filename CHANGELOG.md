@@ -1,3 +1,6 @@
+## 0.0.1+8
+
+* Added onError callback.
 ## 0.0.1+7
 
 * Updated dependencies to their latest versions.
