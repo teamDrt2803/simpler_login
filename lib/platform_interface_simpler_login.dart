@@ -52,6 +52,7 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
     bool updateProfile = false,
     String? displayName,
     String? photoURL,
+    Function(String)? onError,
   }) async {
     try {
       print(email);
@@ -67,15 +68,19 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
       switch (e.code) {
         case 'email-already-in-use':
           _errorStreamController.sink.add('Account already exists');
+          if (onError != null) onError('Account already exists');
           break;
         case 'invalid-email':
           _errorStreamController.sink.add('Provided email is invalid');
+          if (onError != null) onError('Provided email is invalid');
           break;
         case 'weak-password':
           _errorStreamController.sink.add('Provided password is weak');
+          if (onError != null) onError('Provided password is weak');
           break;
         default:
           _errorStreamController.add('Error occured. Contact admin!!');
+          if (onError != null) onError('Error occured. Contact admin!!');
           break;
       }
     }
@@ -100,6 +105,7 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
     bool updateProfile = false,
     String? displayName,
     String? photoURL,
+    Function(String)? onError,
   }) async {
     try {
       var creds = await _auth.signInWithEmailAndPassword(
@@ -113,18 +119,23 @@ abstract class SimplerLoginPlatformInterface extends PlatformInterface {
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'user-disabled':
+          if (onError != null) onError('Account has been banned');
           _errorStreamController.sink.add('Account has been banned');
           break;
         case 'invalid-email':
+          if (onError != null) onError('Provided email is invalid');
           _errorStreamController.sink.add('Provided email is invalid');
           break;
         case 'user-not-found':
+          if (onError != null) onError('Account does not exist');
           _errorStreamController.sink.add('Account does not exist');
           break;
         case 'wrong-password':
+          if (onError != null) onError('Provided password is wrong');
           _errorStreamController.sink.add('Provided password is wrong');
           break;
         default:
+          if (onError != null) onError('Error occured. Contact admin!!');
           _errorStreamController.add('Error occured. Contact admin!!');
           break;
       }
